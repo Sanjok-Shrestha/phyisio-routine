@@ -1,4 +1,17 @@
-let exercises = [
+/**
+ * Exercise database for the physiotherapy routine application.
+ * Stores all available exercises with their metadata, instructions, and visual guides.
+ */
+
+// Default exercise template to reduce repetition
+const EXERCISE_DEFAULTS = {
+    sets: 2,
+    reps: 10,
+    duration: null,
+    instructions: "1. Follow standard form\n2. Control movement\n3. Repeat as needed"
+};
+
+const DEFAULT_EXERCISES = [
 {
         id: 1,
         name: "Ab Stretch",
@@ -232,13 +245,88 @@ let exercises = [
     }
 ];
 
+/**
+ * Initialize exercises from localStorage or use defaults.
+ * Provides persistence across sessions.
+ */
+let exercises = [];
 
-if (localStorage.getItem('physioExercises')) {
-    exercises = JSON.parse(localStorage.getItem('physioExercises'));
+/**
+ * Loads exercises from localStorage or uses default exercises.
+ * @returns {Array} Array of exercise objects
+ */
+function loadExercises() {
+    try {
+        const savedExercises = localStorage.getItem('physioExercises');
+        return savedExercises ? JSON.parse(savedExercises) : DEFAULT_EXERCISES;
+    } catch (error) {
+        console.warn('Failed to load exercises from localStorage, using defaults:', error);
+        return DEFAULT_EXERCISES;
+    }
 }
 
+/**
+ * Saves exercises to localStorage.
+ * @param {Array} data - Array of exercise objects to save
+ * @returns {boolean} True if saved successfully, false otherwise
+ */
+function saveExercises(data) {
+    try {
+        localStorage.setItem('physioExercises', JSON.stringify(data));
+        return true;
+    } catch (error) {
+        console.error('Failed to save exercises to localStorage:', error);
+        return false;
+    }
+}
+
+/**
+ * Gets an exercise by ID.
+ * @param {number} id - The exercise ID
+ * @returns {Object|null} The exercise object or null if not found
+ */
+function getExerciseById(id) {
+    if (!Array.isArray(exercises)) return null;
+    return exercises.find(exercise => exercise.id === id) || null;
+}
+
+/**
+ * Gets exercises filtered by category.
+ * @param {string} category - The category name
+ * @returns {Array} Array of exercises in the specified category
+ */
+function getExercisesByCategory(category) {
+    if (!Array.isArray(exercises)) return [];
+    return exercises.filter(exercise => exercise.category === category);
+}
+
+/**
+ * Gets all unique categories from exercises.
+ * @returns {Array<string>} Array of category names
+ */
+function getCategories() {
+    if (!Array.isArray(exercises)) return [];
+    return [...new Set(exercises.map(exercise => exercise.category))];
+}
+
+// Initialize exercises
+exercises = loadExercises();
+
+// Export exercises and utility functions for use in module and browser environments
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = exercises;
+    module.exports = { 
+        exercises, 
+        loadExercises, 
+        saveExercises,
+        getExerciseById,
+        getExercisesByCategory,
+        getCategories
+    };
 } else {
     window.exercises = exercises;
+    window.loadExercises = loadExercises;
+    window.saveExercises = saveExercises;
+    window.getExerciseById = getExerciseById;
+    window.getExercisesByCategory = getExercisesByCategory;
+    window.getCategories = getCategories;
 }

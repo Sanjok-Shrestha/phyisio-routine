@@ -4,30 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Exercise Library - PhysioRoutine</title>
+    <meta name="description" content="Browse and manage physiotherapy exercises for your routines">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
     <link rel="stylesheet" href="css/components.css">
 </head>
 <body>
- <header class="main-header">
+    <header class="main-header">
         <div class="container">
             <nav class="main-nav">
                 <a href="index.html" class="logo">
                     <img src="logo.png" alt="GurkhaTechnology Logo" />
                     GurkhaTechnology
                 </a>
-                <button id="menu-toggle" class="menu-toggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="nav-links">
+                <button id="menu-toggle" class="menu-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-links">
                     <span></span>
                     <span></span>
                     <span></span>
                 </button>
                 <ul class="nav-links" id="nav-links">
-                    <li><a href="index.html" >Home</a></li>
-                    <li><a href="exercises.html" class="active">Exercise Library</a></li>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="exercises.html" class="active" aria-current="page">Exercise Library</a></li>
                     <li><a href="routines.html">My Routines</a></li>
                     <li><a href="progress.html">My Progress</a></li>
                     <li><a href="login.html">Admin</a></li>
                     <li>
+                        <label for="language-selector" class="sr-only">Select Language</label>
                         <select id="language-selector" aria-label="Select Language">
                             <option value="en">English</option>
                             <option value="np">Nepali</option>
@@ -38,27 +40,27 @@
         </div>
     </header>
 
-    <main>
+    <main id="main-content">
         <div class="container">
             <div class="page-header">
                 <h1>Exercise Library</h1>
                 <p>Browse through our collection of physiotherapy exercises and add them to your routines.
                     <br>
-                    credit : all the images were taken from spotebi.com </p>
+                    <small>Credit: All images sourced from spotebi.com</small>
+                </p>
             </div>
             
             <div class="tabs">
-                <div class="tabs-list" id="category-tabs">
-                    <button class="tab-trigger active" data-category="all">All Exercises</button>
-                    <button class="tab-trigger" data-category="neck">Neck</button>
-                    <button class="tab-trigger" data-category="shoulder">Shoulder</button>
-                    <button class="tab-trigger" data-category="back">Back</button>
-                    <button class="tab-trigger" data-category="knee">Knee</button>
-                    <button class="tab-trigger" data-category="ankle">Ankle</button>
+                <div class="tabs-list" id="category-tabs" role="tablist">
+                    <button class="tab-trigger active" data-category="all" role="tab" aria-selected="true" aria-controls="exercise-grid">All Exercises</button>
+                    <button class="tab-trigger" data-category="neck" role="tab" aria-selected="false" aria-controls="exercise-grid">Neck</button>
+                    <button class="tab-trigger" data-category="shoulder" role="tab" aria-selected="false" aria-controls="exercise-grid">Shoulder</button>
+                    <button class="tab-trigger" data-category="back" role="tab" aria-selected="false" aria-controls="exercise-grid">Back</button>
+                    <button class="tab-trigger" data-category="knee" role="tab" aria-selected="false" aria-controls="exercise-grid">Knee</button>
+                    <button class="tab-trigger" data-category="ankle" role="tab" aria-selected="false" aria-controls="exercise-grid">Ankle</button>
                 </div>
                 
-                <div class="tab-content active" id="exercise-grid">
-                    <!-- Exercise cards will be dynamically inserted here later  -->
+                <div class="tab-content active" id="exercise-grid" role="tabpanel" aria-labelledby="category-tabs">
                     <div class="loading-spinner" id="loading-spinner">
                         <div class="spinner"></div>
                         <p>Loading exercises...</p>
@@ -75,34 +77,37 @@
     </footer>
 
     <!-- Toast notification -->
-    <div class="toast" id="toast">
+    <div class="toast" id="toast" role="status" aria-live="polite" aria-hidden="true">
         <div class="toast-content">
             <p class="toast-title" id="toast-title"></p>
             <p class="toast-message" id="toast-message"></p>
         </div>
-        <button class="toast-close" id="toast-close">&times;</button>
+        <button class="toast-close" id="toast-close" aria-label="Close notification">&times;</button>
     </div>
 
     <script src="js/db.js"></script>
     <script src="js/data.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/exercises.js"></script>
-</main>
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const menuToggle = document.getElementById('menu-toggle');
-    const navLinks = document.getElementById('nav-links');
-    if (menuToggle && navLinks) {
-      menuToggle.addEventListener('click', function () {
-        navLinks.classList.toggle('open');
-      });
-      navLinks.querySelectorAll('a').forEach(link => {
-        link.addEventListener('click', () => {
-          navLinks.classList.remove('open');
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const menuToggle = document.getElementById('menu-toggle');
+            const navLinks = document.getElementById('nav-links');
+            
+            if (menuToggle && navLinks) {
+                menuToggle.addEventListener('click', function () {
+                    const isOpen = navLinks.classList.toggle('open');
+                    menuToggle.setAttribute('aria-expanded', isOpen);
+                });
+                
+                navLinks.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        navLinks.classList.remove('open');
+                        menuToggle.setAttribute('aria-expanded', false);
+                    });
+                });
+            }
         });
-      });
-    }
-  });
-</script>
+    </script>
 </body>
 </html>

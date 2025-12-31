@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Routines - PhysioRoutine</title>
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600&display=swap">
     <link rel="stylesheet" href="css/components.css">
 </head>
 <body>
@@ -28,7 +28,7 @@
                     <li><a href="progress.html">My Progress</a></li>
                     <li><a href="login.html">Admin</a></li>
                     <li>
-                        <select id="language-selector" aria-label="Select Language">
+                        <select id="language-selector" class="language-selector" aria-label="Select Language">
                             <option value="en">English</option>
                             <option value="np">Nepali</option>
                         </select>
@@ -69,7 +69,8 @@
                         <div class="card-content">
                             <div class="form-group">
                                 <label for="routine-name">Routine Name</label>
-                                <input type="text" id="routine-name" placeholder="Enter routine name" class="form-input">
+                                <input type="text" id="routine-name" placeholder="e.g., Shoulder Reset (12 min)" class="form-input">
+                                <small class="subtext">Tip: Add duration and focus area for clarity.</small>
                             </div>
                             
                             <div class="form-group">
@@ -80,6 +81,10 @@
                                 
                                 <div id="builder-exercises">
                                     <!-- Builder exercises will be dynamically inserted here -->
+                                    <div class="empty-builder" id="builder-empty">
+                                        <p>No exercises yet. Browse and add from the library.</p>
+                                        <a href="exercises.html" class="btn btn-outline">Open Exercise Library</a>
+                                    </div>
                                 </div>
                             </div>
                             
@@ -111,26 +116,10 @@
         <button class="toast-close" id="toast-close">&times;</button>
     </div>
 
-    <script src="js/db.js"></script>
-    <script src="js/data.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/routines.js"></script>
-</main>
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const menuToggle = document.getElementById('menu-toggle');
-    const navLinks = document.getElementById('nav-links');
-    if (menuToggle && navLinks) {
-      menuToggle.addEventListener('click', function () {
-        navLinks.classList.toggle('open');
-      });
-      navLinks.querySelectorAll('a').forEach(link => {
-        link.addEventListener('click', () => {
-          navLinks.classList.remove('open');
-        });
-      });
-    }
-  });
-</script>
+        <script src="js/db.js"></script>
+        <script src="js/data.js"></script>
+        <script src="js/ui.js"></script>
+        <script src="js/routines.js"></script>
+        <script src="js/app.js"></script>
 </body>
 </html>

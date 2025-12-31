@@ -5,15 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - PhysioRoutine</title>
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600&display=swap">
     <link rel="stylesheet" href="css/components.css">
 </head>
 <body>
     <header class="main-header">
         <div class="container">
             <nav class="main-nav">
-                <a href="index.html" class="logo">PhysioRoutine</a>
-                <button id="logout-btn" class="btn btn-outline">Logout</button>
+                <a href="index.html" class="logo">
+                    <img src="logo.png" alt="PhysioRoutine Logo" />
+                    PhysioRoutine
+                </a>
+                <div style="display:flex;align-items:center;gap:.75rem;">
+                    <select id="language-selector" class="language-selector" aria-label="Select Language">
+                        <option value="en">English</option>
+                        <option value="np">Nepali</option>
+                    </select>
+                    <button id="logout-btn" class="btn btn-outline">Logout</button>
+                </div>
             </nav>
         </div>
     </header>
@@ -29,10 +38,10 @@
                 <h2>Add New Exercise</h2>
             </div>
             <div class="card-content">
-                <form id="exercise-form">
+                <form id="exercise-form" novalidate>
                     <div class="form-group">
                         <label for="exercise-name">Exercise Name</label>
-                        <input type="text" id="exercise-name" required class="form-input">
+                        <input type="text" id="exercise-name" required class="form-input" placeholder="e.g., Shoulder External Rotation">
                     </div>
 
                     <div class="form-group">
@@ -45,43 +54,46 @@
                             <option value="knee">Knee</option>
                             <option value="ankle">Ankle</option>
                         </select>
+                        <small class="subtext">Choose the primary body area targeted.</small>
                     </div>
 
                     <div class="form-group">
                         <label for="exercise-description">Description</label>
-                        <textarea id="exercise-description" required class="form-input" rows="3"></textarea>
+                        <textarea id="exercise-description" required class="form-input" rows="3" placeholder="Brief summary of the exercise"></textarea>
                     </div>
 
                     <div class="form-group">
                         <label for="exercise-instructions">Instructions (one per line)</label>
-                        <textarea id="exercise-instructions" required class="form-input" rows="5"></textarea>
+                        <textarea id="exercise-instructions" required class="form-input" rows="5" placeholder="Each step on a new line"></textarea>
+                        <small class="subtext">Example: "Stand tall"↵ "Keep neutral spine"↵ "Slow controlled movement"</small>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label for="exercise-sets">Sets</label>
-                            <input type="number" id="exercise-sets" min="1" required class="form-input">
+                            <input type="number" id="exercise-sets" min="1" required class="form-input" placeholder="e.g., 3">
                         </div>
 
                         <div class="form-group">
                             <label for="exercise-reps">Reps (leave blank if using duration)</label>
-                            <input type="number" id="exercise-reps" min="1" class="form-input">
+                            <input type="number" id="exercise-reps" min="1" class="form-input" placeholder="e.g., 12">
                         </div>
 
                         <div class="form-group">
                             <label for="exercise-duration">Duration (seconds, if no reps)</label>
-                            <input type="number" id="exercise-duration" min="1" class="form-input">
+                            <input type="number" id="exercise-duration" min="1" class="form-input" placeholder="e.g., 30">
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label for="exercise-image">Image URL</label>
-                        <input type="url" id="exercise-image" class="form-input">
+                        <input type="url" id="exercise-image" class="form-input" placeholder="https://.../image.jpg">
                     </div>
 
                     <div class="form-group">
                         <label for="exercise-gif">GIF URL</label>
-                        <input type="url" id="exercise-gif" class="form-input">
+                        <input type="url" id="exercise-gif" class="form-input" placeholder="https://.../demo.gif">
+                        <small class="subtext">Provide either an image or GIF (or both).</small>
                     </div>
 
                     <div class="form-actions">
@@ -93,6 +105,7 @@
         </div>
     </main>
 
+    <script src="js/data.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/admin.js"></script>
 </body>

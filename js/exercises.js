@@ -1,61 +1,113 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const exerciseGrid = document.getElementById('exercise-grid');
-    const loadingSpinner = document.getElementById('loading-spinner');
-    
-    // Render all exercises initially
-    renderExercises(exercises);
-    
-    // Make filterExercises available globally for tab switching
-    window.filterExercises = function(category) {
-        if (category === 'all') {
-            renderExercises(exercises);
-        } else {
-            const filtered = exercises.filter(ex => ex.category === category);
-            renderExercises(filtered);
-        }
-    };
-    
-    function renderExercises(exercisesToRender) {
-        // Show loading spinner
-        if (loadingSpinner) loadingSpinner.style.display = 'flex';
-        
-        // Clear existing content
-        if (exerciseGrid) {
-            // Keep the loading spinner in the DOM
-            const children = Array.from(exerciseGrid.children).filter(
-                child => child.id !== 'loading-spinner'
-            );
-            children.forEach(child => child.remove());
-            
-            // Add exercise cards
-            exercisesToRender.forEach(exercise => {
-                const card = createExerciseCard(exercise);
-                exerciseGrid.insertBefore(card, loadingSpinner);
-            });
-            
-            // Hide loading spinner
-            loadingSpinner.style.display = 'none';
-        }
-    }
+/**
+ * Exercises Module
+ * Handles exercise display, filtering, and interaction
+ */
 
-    function createExerciseCard(exercise) {
+const ExercisesModule = {
+    exerciseGrid: null,
+    loadingSpinner: null,
+
+    /**
+     * Initialize the exercises module
+     */
+    init() {
+        this.exerciseGrid = document.getElementById('exercise-grid');
+        this.loadingSpinner = document.getElementById('loading-spinner');
+        
+        this.renderExercises(exercises);
+        this.exposeGlobalFilter();
+    },
+
+    /**
+     * Expose filter function globally for tab switching
+     */
+    exposeGlobalFilter() {
+        window.filterExercises = (category) => {
+            if (!exercises || !Array.isArray(exercises)) {
+                console.error('Exercises data not loaded');
+                return;
+            }
+            const filtered = category === 'all' 
+                ? exercises 
+                : exercises.filter(ex => ex.category === category);
+            this.renderExercises(filtered);
+        };
+    },
+
+    /**
+     * Show loading spinner
+     */
+    showLoading() {
+        if (this.loadingSpinner) this.loadingSpinner.style.display = 'flex';
+    },
+
+    /**
+     * Hide loading spinner
+     */
+    hideLoading() {
+        if (this.loadingSpinner) this.loadingSpinner.style.display = 'none';
+    },
+
+    /**
+     * Render exercises to the grid
+     * @param {Array} exercisesToRender - Array of exercise objects
+     */
+    renderExercises(exercisesToRender) {
+        if (!this.exerciseGrid) return;
+
+        this.showLoading();
+
+        // Remove existing exercise cards but keep loading spinner
+        Array.from(this.exerciseGrid.children)
+            .filter(child => child.id !== 'loading-spinner')
+            .forEach(child => child.remove());
+
+        // Add exercise cards
+        exercisesToRender.forEach(exercise => {
+            const card = this.createExerciseCard(exercise);
+            this.exerciseGrid.insertBefore(card, this.loadingSpinner);
+        });
+
+        this.hideLoading();
+    },
+
+    /**
+     * Get media HTML for exercise
+     * @param {Object} exercise - Exercise object
+     * @returns {string} HTML for media element
+     */
+    getMediaHTML(exercise) {
+        if (exercise.gif) {
+            return `<img src="${exercise.gif}" alt="${exercise.name}" class="exercise-gif">`;
+        } else if (exercise.image) {
+            return `<img src="${exercise.image}" alt="${exercise.name}" class="exercise-image">`;
+        }
+        return '<div class="exercise-image placeholder"></div>';
+    },
+
+    /**
+     * Get reps/duration info HTML
+     * @param {Object} exercise - Exercise object
+     * @returns {string} HTML for exercise specs
+     */
+    getRepsInfo(exercise) {
+        return exercise.reps 
+            ? `<p><strong>Reps:</strong> ${exercise.sets} sets of ${exercise.reps} reps</p>`
+            : `<p><strong>Duration:</strong> ${exercise.duration} seconds per set</p>`;
+    },
+
+    /**
+     * Create an exercise card element
+     * @param {Object} exercise - Exercise object
+     * @returns {HTMLElement} Exercise card element
+     */
+    createExerciseCard(exercise) {
         const card = document.createElement('div');
         card.className = 'exercise-card';
         card.dataset.category = exercise.category;
 
-        // Show GIF directly in card; if no GIF, fallback to image; if neither, show placeholder
-        let media = '';
-        if (exercise.gif) {
-            media = `<img src="${exercise.gif}" alt="${exercise.name}" class="exercise-gif">`;
-        } else if (exercise.image) {
-            media = `<img src="${exercise.image}" alt="${exercise.name}" class="exercise-image">`;
-        } else {
-            media = '<div class="exercise-image placeholder"></div>';
-        }
-
-        const repsInfo = exercise.reps ? 
-            `<p><strong>Reps:</strong> ${exercise.sets} sets of ${exercise.reps} reps</p>` :
-            `<p><strong>Duration:</strong> ${exercise.duration} seconds per set</p>`;
+        const media = this.getMediaHTML(exercise);
+        const repsInfo = this.getRepsInfo(exercise);
 
         card.innerHTML = `
             <div class="card-collapsed">
@@ -79,69 +131,113 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             </div>
         `;
-        
-        // Add click event to toggle card expansion
-        card.addEventListener('click', function(e) {
-            // Don't toggle if clicking on buttons inside expanded card
+
+        // Add event listeners
+        this.attachCardEventListeners(card, exercise);
+
+        return card;
+    },
+
+    /**
+     * Attach event listeners to exercise card
+     * @param {HTMLElement} card - Card element
+     * @param {Object} exercise - Exercise object
+     */
+    attachCardEventListeners(card, exercise) {
+        // Toggle card expansion
+        card.addEventListener('click', (e) => {
             if (!e.target.closest('.exercise-actions')) {
-                const isExpanded = this.classList.toggle('expanded');
-                const collapsed = this.querySelector('.card-collapsed');
-                const expanded = this.querySelector('.card-expanded');
-                
-                if (isExpanded) {
-                    collapsed.style.display = 'none';
-                    expanded.style.display = 'block';
-                } else {
-                    collapsed.style.display = 'flex';
-                    expanded.style.display = 'none';
-                }
+                this.toggleCardExpansion(card);
             }
         });
-        
-        // Add event listeners to buttons
+
+        // View instructions button
         const viewBtn = card.querySelector('.view-instructions');
-        const addBtn = card.querySelector('.add-to-routine');
-        
         if (viewBtn) {
             viewBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                showExerciseModal(exercise);
+                this.showExerciseModal(exercise);
             });
         }
-        
+
+        // Add to routine button
+        const addBtn = card.querySelector('.add-to-routine');
         if (addBtn) {
             addBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                if (typeof db !== 'undefined' && typeof db.addExerciseToRoutine === 'function') {
-                    let routines = db.getRoutines();
-                    let routineId;
-                    if (!routines.length) {
-                        // Create a default routine if none exists
-                        const newRoutine = db.createRoutine('My Routine', []);
-                        routineId = newRoutine.id;
-                        showToast('Routine Created', 'A new routine was created for you.');
-                    } else {
-                        routineId = routines[0].id;
-                    }
-                    const success = db.addExerciseToRoutine(routineId, exercise.id);
-                    if (success) {
-                        showToast('Exercise Added', `${exercise.name} has been added to your routine`);
-                    } else {
-                        showToast('Already Added', `${exercise.name} is already in your routine`);
-                    }
-                } else {
-                    showToast('Error', 'Routine database is not available.');
-                }
+                this.handleAddToRoutine(exercise);
             });
         }
-        
-        return card;
-    }
+    },
 
-    function showExerciseModal(exercise) {
-        // Create modal element
+    /**
+     * Toggle card expansion state
+     * @param {HTMLElement} card - Card element
+     */
+    toggleCardExpansion(card) {
+        const isExpanded = card.classList.toggle('expanded');
+        const collapsed = card.querySelector('.card-collapsed');
+        const expanded = card.querySelector('.card-expanded');
+
+        if (isExpanded) {
+            collapsed.style.display = 'none';
+            expanded.style.display = 'block';
+        } else {
+            collapsed.style.display = 'flex';
+            expanded.style.display = 'none';
+        }
+    },
+
+    /**
+     * Handle adding exercise to routine
+     * @param {Object} exercise - Exercise object
+     */
+    handleAddToRoutine(exercise) {
+        if (typeof db === 'undefined' || typeof db.addExerciseToRoutine !== 'function') {
+            showToast('Error', 'Routine database is not available.');
+            return;
+        }
+
+        let routines = db.getRoutines();
+        
+        if (!Array.isArray(routines)) {
+            showToast('Error', 'Unable to load routines.');
+            return;
+        }
+        
+        let routineId;
+
+        if (!routines.length) {
+            const newRoutine = db.createRoutine('My Routine', []);
+            routineId = newRoutine.id;
+            showToast('Routine Created', 'A new routine was created for you.');
+        } else {
+            routineId = routines[0].id;
+        }
+
+        const success = db.addExerciseToRoutine(routineId, exercise.id);
+        const message = success 
+            ? `${exercise.name} has been added to your routine`
+            : `${exercise.name} is already in your routine`;
+        
+        showToast(
+            success ? 'Exercise Added' : 'Already Added',
+            message
+        );
+    },
+
+    /**
+     * Show exercise details modal
+     * @param {Object} exercise - Exercise object
+     */
+    showExerciseModal(exercise) {
         const modal = document.createElement('div');
         modal.className = 'modal';
+
+        const specsHTML = exercise.reps 
+            ? `<div class="spec"><h4>Reps</h4><p>${exercise.reps}</p></div>`
+            : `<div class="spec"><h4>Duration</h4><p>${exercise.duration} sec</p></div>`;
+
         modal.innerHTML = `
             <div class="modal-content">
                 <button class="modal-close">&times;</button>
@@ -149,7 +245,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 <p class="exercise-category ${exercise.category}">${exercise.category}</p>
                 
                 ${exercise.gif ? `<img src="${exercise.gif}" alt="${exercise.name}" class="exercise-gif">` : ''}
-                
                 ${exercise.image ? `<img src="${exercise.image}" alt="${exercise.name}" class="modal-exercise-image">` : ''}
                 
                 <div class="modal-exercise-details">
@@ -157,61 +252,59 @@ document.addEventListener('DOMContentLoaded', function() {
                     <p>${exercise.description}</p>
                     
                     <h3>Instructions</h3>
-                    <div class="instructions">${exercise.instructions.replace(/\n/g, '<br>')}</div>
+                    <div class="instructions">${Array.isArray(exercise.instructions) ? exercise.instructions.join('<br>') : exercise.instructions.replace(/\n/g, '<br>')}</div>
                     
                     <div class="exercise-specs">
                         <div class="spec">
                             <h4>Sets</h4>
                             <p>${exercise.sets}</p>
                         </div>
-                        <div class="spec">
-                            <h4>${exercise.reps ? 'Reps' : 'Duration'}</h4>
-                            <p>${exercise.reps || exercise.duration + ' sec'}</p>
-                        </div>
+                        ${specsHTML}
                     </div>
                 </div>
                 
                 <button class="btn btn-primary add-to-routine" data-exercise-id="${exercise.id}">Add to Routine</button>
             </div>
         `;
-        
-        // Add to DOM
+
         document.body.appendChild(modal);
         document.body.classList.add('modal-open');
-        
-        // Add event listeners
-        const closeBtn = modal.querySelector('.modal-close');
-        const addBtn = modal.querySelector('.add-to-routine');
-        
-        closeBtn.addEventListener('click', () => {
+
+        this.attachModalEventListeners(modal, exercise);
+    },
+
+    /**
+     * Attach event listeners to modal
+     * @param {HTMLElement} modal - Modal element
+     * @param {Object} exercise - Exercise object
+     */
+    attachModalEventListeners(modal, exercise) {
+        const closeModal = () => {
             document.body.removeChild(modal);
             document.body.classList.remove('modal-open');
-        });
-        
+        };
+
+        // Close button
+        modal.querySelector('.modal-close').addEventListener('click', closeModal);
+
+        // Add to routine button
+        const addBtn = modal.querySelector('.add-to-routine');
         if (addBtn) {
             addBtn.addEventListener('click', () => {
-                // Get the first routine (or prompt user if none)
-                const routines = db.getRoutines();
-                if (!routines.length) {
-                    showToast('No Routine', 'Please create a routine first.');
-                    return;
-                }
-                const routineId = routines[0].id;
-                const success = db.addExerciseToRoutine(routineId, exercise.id);
-                if (success) {
-                    showToast('Exercise Added', `${exercise.name} has been added to your routine`);
-                } else {
-                    showToast('Already Added', `${exercise.name} is already in your routine`);
-                }
+                this.handleAddToRoutine(exercise);
             });
         }
-        
+
         // Close when clicking outside content
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
-                document.body.removeChild(modal);
-                document.body.classList.remove('modal-open');
+                closeModal();
             }
         });
     }
+};
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    ExercisesModule.init();
 });

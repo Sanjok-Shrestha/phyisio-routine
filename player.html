@@ -5,14 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Exercise Player - PhysioRoutine</title>
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600&display=swap">
     <link rel="stylesheet" href="css/components.css">
 </head>
 <body>
     <header class="main-header">
         <div class="container">
             <nav class="main-nav">
-                <a href="index.html" class="logo">PhysioRoutine</a>
+                <a href="index.html" class="logo">
+                    <img src="logo.png" alt="PhysioRoutine Logo" />
+                    PhysioRoutine
+                </a>
                 <button id="menu-toggle" class="menu-toggle" aria-label="Toggle menu">
                     <span></span>
                     <span></span>
@@ -23,6 +26,12 @@
                     <li><a href="exercises.html">Exercise Library</a></li>
                     <li><a href="routines.html">My Routines</a></li>
                     <li><a href="progress.html">My Progress</a></li>
+                    <li>
+                        <select id="language-selector" class="language-selector" aria-label="Select Language">
+                            <option value="en">English</option>
+                            <option value="np">Nepali</option>
+                        </select>
+                    </li>
                 </ul>
             </nav>
         </div>
@@ -30,8 +39,28 @@
 
     <main>
         <div class="container">
-            <div id="player-container">
+            <div id="player-container" class="card player-card">
                 <!-- Player content will be dynamically inserted here -->
+                <div class="player-header">
+                    <div class="player-progress">
+                        <div class="player-progress-bar" style="width:0%"></div>
+                    </div>
+                    <div class="player-info">
+                        <span id="player-exercise-name">Preparing session…</span>
+                        <span id="player-timer">00:00</span>
+                    </div>
+                </div>
+
+                <div class="player-stage">
+                    <div class="exercise-image player-gif" id="player-visual"></div>
+                </div>
+
+                <div class="player-controls">
+                    <button class="btn btn-outline" id="player-prev">Prev</button>
+                    <button class="btn btn-primary" id="player-play">Play</button>
+                    <button class="btn btn-outline" id="player-next">Next</button>
+                </div>
+
                 <div class="loading-spinner" id="player-loading">
                     <div class="spinner"></div>
                     <p>Loading routine...</p>
@@ -58,25 +87,9 @@
     <!-- Hidden audio element for instructions -->
     <audio id="audio-instructions" class="hidden"></audio>
 
-    <script src="js/db.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/player.js"></script>
-</main>
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const menuToggle = document.getElementById('menu-toggle');
-    const navLinks = document.getElementById('nav-links');
-    if (menuToggle && navLinks) {
-      menuToggle.addEventListener('click', function () {
-        navLinks.classList.toggle('open');
-      });
-      navLinks.querySelectorAll('a').forEach(link => {
-        link.addEventListener('click', () => {
-          navLinks.classList.remove('open');
-        });
-      });
-    }
-  });
-</script>
+        <script src="js/db.js"></script>
+        <script src="js/ui.js"></script>
+        <script src="js/player.js"></script>
+        <script src="js/app.js"></script>
 </body>
 </html>
